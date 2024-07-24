@@ -1,0 +1,19 @@
+#
+# docker-compose.yml
+#
+services:
+  #
+  #
+  #
+  peerserver:
+    image: peerjs/peerjs-server:1.1.0-rc.2
+    ports:
+      - 9000:9000
+
+# networks:
+#   backend: {}
+
+# volumes:
+#   database_data: null
+#   phpmyadmin_data: null
+#   mail_data: null

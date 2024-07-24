@@ -16,7 +16,7 @@ services:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "80:80"
+      - "8888:80"
     environment:
       NGINX_HOST: www.example.com
       NGINX_PORT: 80

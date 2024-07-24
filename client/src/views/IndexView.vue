@@ -1,50 +1,29 @@
 <script setup>
-import { Peer } from "peerjs";
-import { ref } from 'vue';
+import { useWebrtcStore } from '@/stores/webrtc'
 
-const myId = ref('')
-const anotherId = ref('')
-
-const peer = new Peer({
-  host: '192.168.11.3',
-  port: 9000,
-  path: '/'
-});
-setTimeout(() => {
-  console.log('peer', peer)
-  console.log('peer.id', peer.id)
-  myId.value = peer.id
-}, 1000)
-
-peer.on("connection", (conn) => {
-  conn.on("data", (data) => {
-    // Will print 'hi!'
-    console.log('--- recieved ---')
-    console.log(data);
-  });
-  conn.on("open", () => {
-    conn.send("hello!");
-  });
-});
-
-const connectRtc = () => {
-  console.log('--- connect() ---')
-  const conn = peer.connect(anotherId.value);
-  conn.on("open", () => {
-    conn.send("hi!");
-  });
-}
+const webrtcStore = useWebrtcStore()
+webrtcStore.init()
 </script>
 
 <template>
   <div class="main">
+    <h1>peer to peer - WebRTC</h1>
     <div>
-    hello.
-    </div>
-    <div>
-      <div class=""><input type="text" class="another_id" v-model="anotherId" /><br />{{ anotherId }}</div>
-      <div class=""><button @click="connectRtc">connect</button></div>
-      <div class="">myID; {{ myId }}</div>
+      <div class="">myID: {{ webrtcStore.myId }}</div>
+      <div class="">
+        name: <input type="text" class="another_id" v-model="webrtcStore.myName" /><br />
+        <input type="text" class="another_id" v-model="webrtcStore.yourId" /><br />{{ anotherId }}
+      </div>
+      <div class=""><button @click="webrtcStore.connectTo">connect</button></div>
+      <div class="">
+        <div>
+          <input type="text" v-model="webrtcStore.sendMessages" />
+          <button @click="webrtcStore.send">メッセージ送信</button>
+        </div>
+        <div class="" v-for="(item, index) in webrtcStore.messageData" :key="index">
+          {{ item.who }}: {{ item.message }}
+        </div>
+      </div>
     </div>
   </div>
 </template>

@@ -1,24 +1,31 @@
 <script setup>
+import { ref } from 'vue'
 import { useWebrtcStore } from '@/stores/webrtc'
 
+// チャット先 ID
+const yourId = ref('')
+
+// 送信メッセージ
+const sendText = ref('')
+
 const webrtcStore = useWebrtcStore()
-webrtcStore.init()
+webrtcStore.init({ host: '192.168.11.3', port: 9000, path: '/' })
 </script>
 
 <template>
   <div class="main">
     <h1>peer to peer - WebRTC</h1>
     <div>
-      <div class="">myID: {{ webrtcStore.myId }}</div>
+      <div class="">myPeerId: {{ webrtcStore.myPeerId }}</div>
       <div class="">
         name: <input type="text" class="another_id" v-model="webrtcStore.myName" /><br />
-        <input type="text" class="another_id" v-model="webrtcStore.yourId" /><br />{{ anotherId }}
+        <input type="text" class="another_id" v-model="yourId" /><br />{{ anotherId }}
       </div>
-      <div class=""><button @click="webrtcStore.connectTo">connect</button></div>
+      <div class=""><button @click="webrtcStore.connect(yourId)">connect</button></div>
       <div class="">
         <div>
-          <input type="text" v-model="webrtcStore.sendMessages" />
-          <button @click="webrtcStore.send">メッセージ送信</button>
+          <input type="text" v-model="sendText" />
+          <button @click="webrtcStore.send(sendText)">メッセージ送信</button>
         </div>
         <div class="" v-for="(item, index) in webrtcStore.messageData" :key="index">
           {{ item.who }}: {{ item.message }}

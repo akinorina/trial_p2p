@@ -10,7 +10,11 @@ const yourId = ref('')
 const sendText = ref('')
 
 const webrtcStore = useWebrtcStore()
-webrtcStore.init({ host: '192.168.11.3', port: 9500, path: '/' })
+webrtcStore.init({
+  host: import.meta.env.VITE_PEER_SERVER_HOST,
+  port: import.meta.env.VITE_PEER_SERVER_PORT,
+  path: import.meta.env.VITE_PEER_SERVER_PATH
+})
 
 onMounted(() => {
   // local Video

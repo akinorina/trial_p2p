@@ -10,8 +10,7 @@ const yourId = ref('')
 const sendText = ref('')
 
 const webrtcStore = useWebrtcStore()
-webrtcStore.init({ host: '192.168.11.3', port: 9000, path: '/' })
-webrtcStore.init()
+webrtcStore.init({ host: '192.168.11.3', port: 9500, path: '/' })
 
 onMounted(() => {
   // local Video
@@ -63,7 +62,7 @@ const runCall = () => {
       </div>
 
       <div class="">
-        <button @click="webrtcStore.tmpRun">tmp run</button>
+        <button @click="webrtcStore.runLocalMedia">tmp run</button>
       </div>
     </div>
   </div>

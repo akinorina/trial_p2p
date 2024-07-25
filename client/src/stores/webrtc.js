@@ -6,72 +6,67 @@ export const useWebrtcStore = defineStore('webrtc', () => {
   // my peer name.
   const myName = ref('')
 
+  // my Peer ID.
+  const myPeerId = ref('')
+
   // peer
   const peer = ref(null)
 
   // data connection
   const dataConn = ref()
 
-  // 送信メッセージ
-  const sendMessages = ref('')
-
   // 送受信メッセージデータ
   const messageData = ref([])
 
-  // my ID.
-  const myId = ref('')
-  // const myId = computed(() => peer.value.id)
-
-  // your ID.
-  const yourId = ref('')
-
-  function init() {
+  function init(options) {
+    // Peerサーバー接続
     peer.value = new Peer({
-      host: '192.168.11.3',
-      port: 9000,
-      path: '/'
+      host: options.host,
+      port: options.port,
+      path: options.path
     })
-    setTimeout(() => {
-      // console.log('peer.value', peer.value)
-      // console.log('peer.value.id', peer.value.id)
-      myId.value = peer.value.id
-    }, 3000)
+    peer.value.on('open', () => {
+      myPeerId.value = peer.value.id
+    })
 
-    // 接続された
+    // Data Connection 着信
     peer.value.on('connection', (conn) => {
-      console.log('--- on connection ---', conn)
-
-      conn.on('data', (data) => {
-        // Will print 'hi!'
-        // console.log('--- recieved ---')
-        // console.log(data)
-        messageData.value.push({ who: '相手', message: data })
-      })
+      dataConn.value = conn;
 
       conn.on('open', () => {
         const firstMsg = 'hello! my name is ' + myName.value
-        conn.send(firstMsg)
-        messageData.value.push({ who: '私', message: firstMsg })
+        const sendData = { who: myName.value, message: firstMsg }
+        conn.send(sendData)
+        messageData.value.push(sendData)
+      })
+
+      conn.on('data', (data) => {
+        messageData.value.push(data)
       })
     })
   }
 
-  function connectTo() {
-    console.log('--- connectTo() ---')
-    dataConn.value = peer.value.connect(yourId.value)
+  // Data Connection 発信
+  function connect(destId) {
+    dataConn.value = peer.value.connect(destId)
 
     dataConn.value.on('open', () => {
-      const messages = 'hi! my name is ' + myName.value
-      dataConn.value.send(messages)
-      messageData.value.push({ who: '私', message: messages })
+      const sendData = { who: myName.value, message: 'hi! my name is ' + myName.value };
+      dataConn.value.send(sendData)
+      messageData.value.push(sendData)
+    })
+
+    dataConn.value.on('data', (data) => {
+      messageData.value.push(data)
     })
   }
 
-  function send() {
-    console.log('--- send() ---')
-    dataConn.value.send(sendMessages.value)
-    messageData.value.push({ who: '私', message: sendMessages.value })
+  // メッセージの送信
+  function send(sendText) {
+    const sendData = { who: myName.value, message: sendText };
+    dataConn.value.send(sendData)
+    messageData.value.push(sendData)
   }
 
-  return { myName, myId, yourId, messageData, sendMessages, init, connectTo, send }
+  return { myName, myPeerId, messageData, init, connect, send }
 })

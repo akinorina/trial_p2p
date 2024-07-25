@@ -11,4 +11,3 @@ RUN npm run build
 FROM nginx as production-stage
 RUN mkdir -p /app
 COPY --from=build-stage /app/dist /app
-COPY nginx/conf.d/default.conf /etc/nginx/conf.d/default.conf

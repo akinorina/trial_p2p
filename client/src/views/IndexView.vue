@@ -23,8 +23,12 @@ onMounted(() => {
   webrtcStore.videoRemote = document.getElementById('video2')
 })
 
+const runConnect = () => {
+  webrtcStore.connect(yourId.value)
+}
+
 const runCall = () => {
-  webrtcStore.call()
+  webrtcStore.call(yourId.value)
 }
 </script>
 
@@ -38,7 +42,7 @@ const runCall = () => {
         name: <input type="text" class="another_id" v-model="webrtcStore.myName" /><br />
         <input type="text" class="another_id" v-model="yourId" /><br />
       </div>
-      <div class=""><button @click="webrtcStore.connect(yourId)">connect</button></div>
+      <div class=""><button @click="runConnect">connect</button></div>
 
       <div class="">
         <div>

@@ -1,0 +1,7 @@
+# docker ignore
+.git
+.vscode
+dist
+node_modules
+
+.DS_Store

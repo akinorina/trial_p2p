@@ -1,6 +1,5 @@
 <script setup>
-import { ref } from 'vue'
-import { onMounted } from 'vue'
+import { onMounted, onBeforeUnmount, ref } from 'vue'
 import { useWebrtcStore } from '@/stores/webrtc'
 
 // チャット先 ID
@@ -10,11 +9,6 @@ const yourId = ref('')
 const sendText = ref('')
 
 const webrtcStore = useWebrtcStore()
-webrtcStore.init({
-  host: import.meta.env.VITE_PEER_SERVER_HOST,
-  port: import.meta.env.VITE_PEER_SERVER_PORT,
-  path: import.meta.env.VITE_PEER_SERVER_PATH
-})
 
 onMounted(() => {
   // local Video
@@ -22,13 +16,31 @@ onMounted(() => {
   // remote Video
   webrtcStore.videoRemote = document.getElementById('video2')
 })
+onBeforeUnmount(() => {
+  runDisconnect()
+  closePeer()
+})
 
-const runConnect = () => {
-  webrtcStore.connect(yourId.value)
+const openPeer = () => {
+  webrtcStore.open({
+    host: import.meta.env.VITE_PEER_SERVER_HOST,
+    port: import.meta.env.VITE_PEER_SERVER_PORT,
+    path: import.meta.env.VITE_PEER_SERVER_PATH
+  })
 }
-
-const runCall = () => {
-  webrtcStore.call(yourId.value)
+const closePeer = () => {
+  webrtcStore.close()
+}
+const runConnect = () => {
+  webrtcStore.connectData(yourId.value)
+  webrtcStore.connectMedia(yourId.value)
+}
+const runDisconnect = () => {
+  webrtcStore.disconnectMedia()
+  webrtcStore.disconnectData()
+}
+const sendMessage = () => {
+  webrtcStore.sendData(sendText.value)
 }
 </script>
 
@@ -36,18 +48,31 @@ const runCall = () => {
   <div class="main">
     <h1>peer to peer - WebRTC</h1>
     <div>
-      <div class="">myPeerId: {{ webrtcStore.myPeerId }}</div>
-
+      <button @click="openPeer">open Peer</button>
+    </div>
+    <div>
+      <div>
+        <div class="">myPeerId: {{ webrtcStore.myPeerId }}</div>
+      </div>
       <div class="">
         name: <input type="text" class="another_id" v-model="webrtcStore.myName" /><br />
-        <input type="text" class="another_id" v-model="yourId" /><br />
+        <input type="text" class="another_id" v-model="yourId" />
+        <button @click="runConnect">connect</button>
+        <br />
+        <button @click="runDisconnect">disconnect</button>
       </div>
-      <div class=""><button @click="runConnect">connect</button></div>
+    </div>
+    <br />
+
+    <div>
+      <div class="">
+        <button @click="closePeer">close connection</button>
+      </div>
 
       <div class="">
         <div>
           <input type="text" v-model="sendText" />
-          <button @click="webrtcStore.send(sendText)">メッセージ送信</button>
+          <button @click="sendMessage">メッセージ送信</button>
         </div>
         <div class="" v-for="(item, index) in webrtcStore.messageData" :key="index">
           {{ item.who }}: {{ item.message }}
@@ -56,7 +81,6 @@ const runCall = () => {
       <br />
 
       <div class="">
-        <button @click="runCall">run call</button><br />
         <div class="videos">
           <div class="videos_local">
             <h3>local</h3>
@@ -67,10 +91,6 @@ const runCall = () => {
             <video class="video" id="video2" autoplay muted playsinline></video>
           </div>
         </div>
-      </div>
-
-      <div class="">
-        <button @click="webrtcStore.runLocalMedia">tmp run</button>
       </div>
     </div>
   </div>
@@ -86,8 +106,8 @@ const runCall = () => {
   flex-flow: row nowrap;
 
   .video {
-    width: 500px;
-    height: 400px;
+    width: 400px;
+    height: 350px;
   }
 }
 </style>

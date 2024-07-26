@@ -3,30 +3,75 @@
 #
 services:
   #
+  # peer server
   #
-  #
-  server:
-    image: peerjs/peerjs-server:1.1.0-rc.2
+  peer-server:
+    build:
+      context: ./peer-server
+      dockerfile: Dockerfile
     ports:
-      - 9000:9000
+      - "9500:9500"
 
+  # #
+  # # TURN server
+  # #
+  # # docker run -d -p 3478:3478 -p 3478:3478/udp -p 5349:5349 -p 5349:5349/udp -p 49152-65535:49152-65535/udp coturn/coturn
+  # coturn:
+  #   image: coturn/coturn
+  #   ports:
+  #     - 3478:3478
+  #     - 3478:3478/udp
+  #     - 5349:5349
+  #     - 5349:5349/udp
+  #     - 49152-65535:49152-65535/udp
+
+  #
+  # peer client
+  #
   client:
-    image: nginx
     build:
       context: ./client
       dockerfile: Dockerfile
     ports:
-      - "8888:80"
+      - "8000:8000"
     environment:
-      NGINX_HOST: www.example.com
-      NGINX_PORT: 80
+      NGINX_HOST: client
+      NGINX_PORT: 8000
     volumes:
       - ./client/nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./client/dist:/usr/share/nginx/html
-# networks:
-#   backend: {}
 
-# volumes:
-#   database_data: null
-#   phpmyadmin_data: null
-#   mail_data: null
+  #
+  # reverse proxy
+  #
+  reverse-proxy:
+    build:
+      context: ./reverse-proxy
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      NGINX_HOST: reverse-proxy
+      NGINX_PORT: 443
+    volumes:
+      - ./reverse-proxy/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./reverse-proxy/nginx/server.crt:/etc/ssl/private/server.crt:ro
+      - ./reverse-proxy/nginx/server.csr:/etc/ssl/private/server.csr:ro
+      - ./reverse-proxy/nginx/server.key:/etc/ssl/private/server.key:ro
+
+  #
+  # forward proxy
+  #
+  proxy:
+    image: ubuntu/squid
+    ports:
+      - '3128:3128'
+    environment:
+      TZ: 'UTC'
+    volumes:
+      - squid_data:/var/spool/squid
+      - ./squid/squid.conf:/etc/squid/squid.conf:ro
+
+volumes:
+  squid_data: null

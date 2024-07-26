@@ -9,7 +9,7 @@ const yourId = ref('')
 const sendText = ref('')
 
 const webrtcStore = useWebrtcStore()
-webrtcStore.init({ host: '192.168.11.3', port: 9000, path: '/' })
+webrtcStore.init({ host: 'www.apsbase.com', port: 443, path: '/peer' })
 </script>
 
 <template>

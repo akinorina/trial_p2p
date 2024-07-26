@@ -56,11 +56,11 @@ const runCall = () => {
         <div class="videos">
           <div class="videos_local">
             <h3>local</h3>
-            <video class="video" id="video1" autoplay muted :playsinline="true"></video>
+            <video class="video" id="video1" autoplay muted playsinline></video>
           </div>
           <div class="videos_remote">
             <h3>remote</h3>
-            <video class="video" id="video2" autoplay muted :playsinline="true"></video>
+            <video class="video" id="video2" autoplay muted playsinline></video>
           </div>
         </div>
       </div>
